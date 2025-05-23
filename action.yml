@@ -16,6 +16,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Install GitHub CLI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gh
+
     - name: Get latest run id for "${{ inputs.main-branch-artifact-upload-workflow }}"
       env:
         GH_TOKEN: ${{ inputs.github-token }}
