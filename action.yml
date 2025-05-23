@@ -1,0 +1,33 @@
+name: 'JaCoCo Report'
+description: 'Generate an overview of code coverage'
+inputs:
+  github-token:
+    description: 'GitHub token for authentication'
+    required: true
+  github-repository:
+    description: 'GitHub repository name (e.g., owner/repo)'
+    required: true
+  main-branch-artifact-upload-workflow:
+    description: 'Upload JaCoCo report from main branch'
+    required: true
+  main-branch-artifact-name:
+    description: 'Name of the JaCoCo report artifact from main branch'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Get latest run id for "${{ inputs.main-branch-artifact-upload-workflow }}"
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        run_id=$(gh run list --workflow="${{ inputs.main-branch-artifact-upload-workflow }}" --json databaseId,conclusion --jq '.[] | select(.conclusion == "success") | .databaseId' | head -n 1)
+        echo "run_id=${run_id}" >> $GITHUB_ENV
+    
+    - name: Download JaCoCo report
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.main-branch-artifact-name }}
+        path: ${{ inputs.main-branch-artifact-name }}
+        github-token: ${{ inputs.github-token }}
+        repository: ${{ inputs.github-repository }}
+        run-id: ${{ env.run_id }}
