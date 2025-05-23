@@ -25,7 +25,11 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github-token }}
       run: |
-        run_id=$(gh run list --workflow=${{ inputs.main-branch-artifact-upload-workflow }} --json databaseId,conclusion --jq '.[] | select(.conclusion == "success") | .databaseId' | head -n 1)
+        run_id=$(gh run list \
+          --repo=${{ inputs.github-repository }} \
+          --workflow=${{ inputs.main-branch-artifact-upload-workflow }} \
+          --json databaseId,conclusion \
+          --jq '.[] | select(.conclusion == "success") | .databaseId' | head -n 1)
         echo "run_id=${run_id}" >> $GITHUB_ENV
     
     - name: Download JaCoCo report
